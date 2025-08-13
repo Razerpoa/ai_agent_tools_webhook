@@ -1,0 +1,10 @@
+flask
+python-dotenv
+duckduckgo-search
+requests
+beautifulsoup4
+lxml
+selenium
+fake-useragent
+gunicorn
+gc
