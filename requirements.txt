@@ -7,4 +7,3 @@ lxml
 selenium
 fake-useragent
 gunicorn
-gc

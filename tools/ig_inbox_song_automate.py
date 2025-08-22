@@ -82,12 +82,17 @@ def get_song_data():
                     # The alt text is usually "USERNAME's profile picture"
                     user_name = alt_text.split("'s profile picture")[0]
 
-                    # Get song and artist
-                    song_div = note.find_element(By.XPATH, ".//div[@class='x6s0dn4 x78zum5 x1n2onr6']")
-                    song_title = song_div.text.strip()
+                    song_title = None
+                    artist_name = None
+                    try:
+                        # Get song and artist
+                        song_div = note.find_element(By.XPATH, ".//div[@class='x6s0dn4 x78zum5 x1n2onr6']")
+                        song_title = song_div.text.strip()
 
-                    artist_span = note.find_element(By.XPATH, ".//span[@class='x1lliihq x6ikm8r x10wlt62 x1n2onr6 xlyipyv xuxw1ft x1roi4f4']")
-                    artist_name = artist_span.text.strip()
+                        artist_span = note.find_element(By.XPATH, ".//span[@class='x1lliihq x6ikm8r x10wlt62 x1n2onr6 xlyipyv xuxw1ft x1roi4f4']")
+                        artist_name = artist_span.text.strip()
+                    except NoSuchElementException:
+                        pass # Not a song note
 
                     # Get note
                     note_text = ""
@@ -103,12 +108,21 @@ def get_song_data():
                     except Exception:
                         note_text = "" # Keep it safe
 
-                    if not song_title or song_title == artist_name:
+                    if song_title and (not song_title or song_title == artist_name):
+                        song_title = None # Invalid song
+
+                    if not song_title and not note_text:
                         continue
 
-                    result = {"user": user_name, "song": song_title, "artist": artist_name, "note": note_text}
+                    result = {"user": user_name, "song": song_title or "", "artist": artist_name or "", "note": note_text}
                     results.append(result)
-                    logging.info(f"Found song: {song_title} by {artist_name} for user {user_name}")
+                    
+                    log_message = f"Found for user {user_name}:"
+                    if song_title:
+                        log_message += f" song='{song_title}' by '{artist_name}'"
+                    if note_text:
+                        log_message += f" note='{note_text}'"
+                    logging.info(log_message)
 
                 except NoSuchElementException:
                     # If an element is not found, it's likely not a song note, so skip it.
